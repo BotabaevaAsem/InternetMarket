@@ -3,11 +3,10 @@ import java.util.*;
 public class OnlineStore {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Cart cart = new Cart();
         NotificationManager notificationManager = NotificationManager.getInstance();
+
         User user = new User("Yesdaulet");
         notificationManager.addObserver(user);
-
 
         List<Product> products = new ArrayList<>();
         products.add(new BasicProduct(1, "Smartphone", 1000, "Electronics"));
@@ -26,8 +25,8 @@ public class OnlineStore {
 
                 int choice1 = scanner.nextInt();
                 switch (choice1) {
-                    case 1 -> handleCustomer(scanner, cart, products);
-                    case 2 -> handleAdmin(scanner, admin, notificationManager);
+                    case 1 -> handleCustomer(scanner, user, products);
+                    case 2 -> handleAdmin(scanner, admin);
                     case 3 -> {
                         System.out.println("Exiting the system...");
                         return;
@@ -41,8 +40,9 @@ public class OnlineStore {
         }
     }
 
+    private static void handleCustomer(Scanner scanner, User user, List<Product> products) {
+        Cart cart = user.getCart();
 
-    private static void handleCustomer(Scanner scanner, Cart cart, List<Product> products) {
         while (true) {
             try {
                 System.out.println("\nMain Menu:");
@@ -60,7 +60,7 @@ public class OnlineStore {
                     case 1 -> {
                         System.out.println("======== Products ========");
                         for (Product product : products) {
-                            System.out.println(product.getDescription() + " - " + product.getPrice() + " $");
+                            System.out.println(product.getId() + ". " + product.getDescription() + " - " + product.getPrice() + " $");
                         }
                     }
                     case 2 -> {
@@ -121,8 +121,7 @@ public class OnlineStore {
         }
     }
 
-
-    private static void handleAdmin(Scanner scanner, Admin admin, NotificationManager notificationManager) {
+    private static void handleAdmin(Scanner scanner, Admin admin) {
         System.out.print("Enter the PASSWORD: ");
         scanner.nextLine();
         String password = scanner.nextLine();
@@ -133,8 +132,9 @@ public class OnlineStore {
                     System.out.println("1. View Products");
                     System.out.println("2. Add New Product");
                     System.out.println("3. Add Discounted Product");
-                    System.out.println("4. Delete Product");
-                    System.out.println("5. Quit Admin Mode");
+                    System.out.println("4. Edit Product");
+                    System.out.println("5. Delete Product");
+                    System.out.println("6. Quit Admin Mode");
                     System.out.print("Enter: ");
 
                     int choice = scanner.nextInt();
@@ -144,7 +144,7 @@ public class OnlineStore {
                             System.out.println("Enter Product ID:");
                             int id = scanner.nextInt();
                             System.out.println("Enter Product Name:");
-                            scanner.nextLine(); // Пропускаем новую строку
+                            scanner.nextLine();
                             String name = scanner.nextLine();
                             System.out.println("Enter Product Price:");
                             double price = scanner.nextDouble();
@@ -170,11 +170,25 @@ public class OnlineStore {
                         }
                         case 4 -> {
                             admin.showProducts();
+                            System.out.println("Enter Product ID to edit:");
+                            int id = scanner.nextInt();
+                            System.out.println("Enter new Product Name:");
+                            scanner.nextLine();
+                            String newName = scanner.nextLine();
+                            System.out.println("Enter new Product Price:");
+                            double newPrice = scanner.nextDouble();
+                            System.out.println("Enter new Product Category:");
+                            scanner.nextLine();
+                            String newCategory = scanner.nextLine();
+                            admin.editProduct(id, newName, newPrice, newCategory);
+                        }
+                        case 5 -> {
+                            admin.showProducts();
                             System.out.println("Enter Product ID to delete:");
                             int id = scanner.nextInt();
                             admin.removeProduct(id);
                         }
-                        case 5 -> {
+                        case 6 -> {
                             System.out.println("Exiting Admin Mode...");
                             return;
                         }
@@ -190,13 +204,7 @@ public class OnlineStore {
         }
     }
 
-
     private static Product findProductById(List<Product> products, int id) {
-        for (Product product : products) {
-            if (product.id == id) {
-                return product;
-            }
-        }
-        return null;
+        return products.stream().filter(product -> product.getId() == id).findFirst().orElse(null);
     }
 }

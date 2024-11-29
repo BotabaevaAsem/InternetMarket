@@ -21,17 +21,30 @@ public class Admin {
         products.add(new DiscountedProduct(new BasicProduct(id, name, price, category), discount));
         System.out.println("Discounted Product \"" + name + "\" in category \"" + category + "\" added.");
     }
-    public void editProduct(int id, String newName, double newPrice) {
-        for (Product product : products) {
-            if (product.getId() == id) {
-                product.name = newName;
-                product.price = newPrice;
-                System.out.println("Product with ID " + id + " updated.");
-                return;
+    public void editProduct(int id, String newName, double newPrice, String newCategory) {
+        Product productToEdit = products.stream()
+                .filter(product -> product.getId() == id)
+                .findFirst()
+                .orElse(null);
+
+        if (productToEdit != null) {
+
+            if (productToEdit instanceof DiscountedProduct discountedProduct) {
+                Product baseProduct = new BasicProduct(id, newName, newPrice, newCategory);
+                double discount = discountedProduct.getDiscount();
+                products.remove(productToEdit);
+                products.add(new DiscountedProduct(baseProduct, discount));
+            } else {
+
+                products.remove(productToEdit);
+                products.add(new BasicProduct(id, newName, newPrice, newCategory));
             }
+            System.out.println("Product with ID " + id + " updated successfully!");
+        } else {
+            System.out.println("Product with ID " + id + " not found.");
         }
-        System.out.println("Product with ID " + id + " not found.");
     }
+
 
 
 
